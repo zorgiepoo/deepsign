@@ -21,12 +21,11 @@ def log_message_bytes(message):
 	except UnicodeDecodeError:
 		pass
 
+# Note: do not check for Mach-O binaries specifically; technically other types of files can be signed (via xattr) like executable marked scripts, even though it's bad practice
+# If allow_ordinary_files is True, we allow signing non-executable permission marked files
+# If we are in root bundle directories excepting Info.plist, PkgInfo, etc, then allow_ordinary_files should be passed as False
+# Otherwise if are in a directory expecting signed files like MacOS, then allow_ordinary_files should be passed as True
 def executable_candidate(path, allow_ordinary_files):
-	# Ignore top level files such as Info.plist, PkgInfo, etc..
-	# We do this by only looking at executable permission marked files
-	# Which should be a valid approach; anything that is sign-able should be marked executable (and vise versa), even .dylib/.so libraries
-	# Note: do not check for Mach-O binaries specifically; technically other types of files can be signed (via xattr) like executable marked scripts, even though it's bad practice
-	
 	return (not os.path.islink(path) and not os.path.isdir(path) and (allow_ordinary_files or os.access(path, os.X_OK)))
 
 def bundle_candidate(path):
