@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-#
-# This tool can be used to code sign a bundle recursively with your own signature, whether that be ad-hoc ("-"), self-signed, a developer ID, etc..
-# It is intended for alterations to signed applications, which may be done to remove or bypass restrictions and simple validation checks performed at run-time
-# This behaves almost like `codesign --deep -fs` except codesign's deep signing does not handle some edge cases due to strange or poorly structured bundles 
-# Note just like with `codesign --deep -s`, using this tool for application development is not recommended; prefer Xcode instead.
-#
 
 import os, sys, subprocess, argparse
 
