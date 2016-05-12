@@ -1,10 +1,10 @@
 # deepsign
 
-This tool can be used to code sign a bundle recursively with your own signature, whether that be ad-hoc ("-"), self-signed, a developer ID, etc..
+This tool can be used to code sign a bundle recursively with your own signing identity, whether that be ad-hoc ("-"), self-signed, a Developer ID, etc..
 
-It is intended for making alterations to signed applications, which may be done to remove or bypass simple restrictions enforced at run-time. This tool is modeled after `codesign --deep -fs` except it's intended to handle more edge cases.
+It is intended for making modifications to signed applications, which may be done to remove or bypass restrictions enforced at run-time. This tool is modeled after `codesign --deep -fs` except that it's intended to handle more applications & edge cases. See the source code for more info.
 
-Note just like with `codesign --deep -s`, using this tool for application development is not recommended; prefer Xcode instead for that.
+Note just like with `codesign --deep -s`, using this tool for application development is not recommended; prefer Xcode instead.
 
 ## Example Cases
 
@@ -22,11 +22,11 @@ So to fix that, I re-sign the application with my Developer ID certificate:
 > python deepsign.py "Developer ID" Bit\ Slicer.app
 ```
 
-And wala! Note that this application has a strict requirement, meaning that using an ad-hoc signature here does no good.
+And wala! Note that this application has a strict signature requirement, meaning that using an ad-hoc signature here does no good.
 
 ### Maps
 
-As a developer, for whatever reason, I want to reverse engineer and debug Apple's Maps application.
+As a developer, I want to reverse engineer and debug Apple's Maps application.
 
 ```
 > lldb /Applications/Maps.app
@@ -55,4 +55,6 @@ And we are all good :). Note in this case I used an ad-hoc ("-") signature.
 
 Naturally changing an application's code signature may have some undesired effects. For one, if the signature of an application changes, OS X's Keychain may not recgonize the new signature and will ask to allow changes. Some applications could decide to bail due to additional checks they may enforce. Others could fail to cooperate with certain services like iCloud. Applications could possibly even operate in a different "namespace", and so on.
 
-While code signatures are not intended to be changed from one application version to the next, there is always the possibility a developer could lose access or have their initial certificate compromised. But how the developer signs their application and how a user may re-sign it can also differ in some ways.
+While code signatures are not intended to change from one application version to the next, there is always the possibility a developer could lose access or have their initial certificate compromised. But how the developer signs their application and how a user may re-sign it can also differ in some ways.
+
+Live dangerously!
