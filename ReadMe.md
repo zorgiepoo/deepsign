@@ -22,7 +22,7 @@ So to fix that, I re-sign the application with my Developer ID certificate:
 > python deepsign.py "Developer ID" Bit\ Slicer.app
 ```
 
-And wala! Note that this application has a strict signature requirement, meaning that using an ad-hoc signature here does no good.
+And voila! Note that this application has a strict signature requirement, meaning that using an ad-hoc signature here does no good.
 
 ### Maps
 
