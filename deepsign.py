@@ -21,12 +21,13 @@ def log_message_bytes(message):
 	except UnicodeDecodeError:
 		pass
 
-def executable_candidate(path):
+def executable_candidate(path, allow_ordinary_files):
 	# Ignore top level files such as Info.plist, PkgInfo, etc..
 	# We do this by only looking at executable permission marked files
 	# Which should be a valid approach; anything that is sign-able should be marked executable (and vise versa), even .dylib/.so libraries
 	# Note: do not check for Mach-O binaries specifically; technically other types of files can be signed (via xattr) like executable marked scripts, even though it's bad practice
-	return (not os.path.islink(path) and not os.path.isdir(path) and os.access(path, os.X_OK))
+	
+	return (not os.path.islink(path) and not os.path.isdir(path) and (allow_ordinary_files or os.access(path, os.X_OK)))
 
 def bundle_candidate(path):
 	# Does the directory have a file extension - could it be a bundle?
@@ -50,7 +51,7 @@ def codesign_file(path, identity, verbose):
 		log_message("Error: Failed to codesign %s" % (path))
 		sys.exit(1)
 
-def codesign_files_in(directory_path, identity, verbose):
+def codesign_files_in(directory_path, identity, verbose, from_root=True):
 	bundles = []
 	executables = []
 
@@ -58,16 +59,21 @@ def codesign_files_in(directory_path, identity, verbose):
 	for signing_directory in VALID_SIGNING_PATHS:
 		signing_directory_filename = os.path.join(directory_path, signing_directory)
 		if os.path.exists(signing_directory_filename):
+			is_root = (signing_directory == CURRENT_DIRECTORY_PATH)
+			should_recurse = not is_root or not from_root
 			for filename in os.listdir(signing_directory_filename):
 				filepath = os.path.join(signing_directory_filename, filename)
 				if bundle_candidate(filepath):
 					bundles.append(filepath)
-				elif executable_candidate(filepath):
+				elif executable_candidate(filepath, allow_ordinary_files=should_recurse):
+					# If we are in a root directory, we should only sign executable permission marked files
+					# However, if we are in a directory where codesign only expects signed files, we should sign them anyway
+					# Eg: VLC's poor bundle structure has Contents/MacOS/share/vlc512x512.png which *should* be signed
 					executables.append(filepath)
-				elif signing_directory != CURRENT_DIRECTORY_PATH and os.path.isdir(filepath):
+				elif should_recurse and os.path.isdir(filepath):
 					# Another directory we should try to recurse into
 					# For example: Contents/PlugIns/moo/foo.plugin is OK.
-					codesign_files_in(filepath, identity, verbose)
+					codesign_files_in(filepath, identity, verbose, from_root=False)
 
 	#Make sure we sign bundles before we sign executables because top-level executables may require
 	#the bundles sitting right next to it to be signed first
@@ -127,7 +133,7 @@ if __name__ == "__main__":
 		log_message("Error: %s does not exist" % (sign_path))
 		sys.exit(1)
 
-	if executable_candidate(sign_path):
+	if executable_candidate(sign_path, allow_ordinary_files=True):
 		codesign_file(sign_path, signing_identity, verbose)
 	elif bundle_candidate(sign_path):
 		codesign_bundle(sign_path, signing_identity, verbose)
