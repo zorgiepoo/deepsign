@@ -2,9 +2,9 @@
 
 This tool can be used to code sign a bundle recursively with your own signing identity, whether that be ad-hoc ("-"), self-signed, a Developer ID, etc..
 
-It is intended for making modifications to signed applications, which may be done to remove or bypass restrictions enforced at run-time. This tool is modeled after `codesign --deep -fs` except that it's intended to handle more applications & edge cases. See the source code for more info.
+It is intended for making modifications to signed applications, which may be done to remove or bypass restrictions enforced at run-time. This tool is modeled after `codesign --deep -fs` except that it's intended to handle improperly structured applications. See the source code for more info.
 
-Note just like with `codesign --deep -s`, using this tool for application development is not recommended; prefer Xcode instead.
+Note just like with `codesign --deep -s`, using this tool for application development is not recommended; prefer Xcode instead. This is because the same parameters are applied to all signable content.
 
 ## Example Cases
 
